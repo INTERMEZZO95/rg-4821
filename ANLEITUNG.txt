@@ -1,0 +1,32 @@
+KONTROLLRUNDGANG – Web-App auf GitHub Pages veröffentlichen
+===========================================================
+
+1) Auf github.com oben rechts "+" -> "New repository".
+   - Name: z. B. rg-4821 (unauffällig, ohne Leerzeichen)
+   - Public auswählen -> "Create repository".
+
+2) Im neuen Repository: "uploading an existing file" bzw.
+   "Add file" -> "Upload files". Die DATEIEN aus diesem Ordner hineinziehen
+   (nicht den Ordner selbst):
+     index.html, sw.js, manifest.webmanifest,
+     icon-192.png, icon-512.png, apple-touch-icon.png
+   (icon-1024.png wird nicht benötigt.)
+   Unten "Commit changes".
+
+3) "Settings" -> "Pages" -> unter "Branch" main und "/ (root)" wählen -> Save.
+   Nach 1-2 Minuten erscheint oben die Adresse:
+   https://DEINNAME.github.io/REPONAME/
+
+4) Auf dem iPhone in SAFARI die Adresse öffnen, einmal mit Netz komplett laden.
+   Teilen-Symbol -> "Zum Home-Bildschirm" -> Hinzufügen.
+
+5) Test: Flugmodus an, App vom Home-Bildschirm starten -> sie muss öffnen.
+
+WICHTIG
+- Immer über das Home-Bildschirm-Symbol eintragen, nicht im Safari-Tab
+  (getrennte Speicher).
+- Daten liegen nur auf dem iPhone. Regelmäßig "Export" -> CSV sichern
+  (Teilen -> In Dateien sichern). "Import" liest diese Datei wieder ein.
+- Updates: geänderte Dateien hochladen und in sw.js die Version
+  ("rundgang-v1" -> "rundgang-v2") erhöhen. Die neue Version erscheint beim
+  übernächsten Start der App.

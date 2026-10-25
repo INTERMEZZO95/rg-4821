@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rundgang">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#1f4e5f">
+<title>Kontrollrundgang</title>
+<style>
+:root{--card:rgba(255,255,255,.86);--text:#111;--sub:#555;--line:#d6d6d6;--acc:#2e7d32;--danger:#c62828;--field:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--card:rgba(28,28,30,.86);--text:#f2f2f2;--sub:#b5b5b5;--line:#3a3a3c;--acc:#66bb6a;--danger:#ef5350;--field:#2c2c2e}}
+:root[data-theme="dark"]{--card:rgba(28,28,30,.86);--text:#f2f2f2;--sub:#b5b5b5;--line:#3a3a3c;--acc:#66bb6a;--danger:#ef5350;--field:#2c2c2e}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);background:#5b7f9c}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(160deg,#1f4e5f 0%,#2e7d6b 55%,#4b8f5a 100%)}
+main{max-width:640px;margin:0 auto;padding:12px 14px 96px}
+h1{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);font-size:30px;margin:8px 0 12px}
+.bar{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.card{background:var(--card);border-radius:14px;padding:12px 14px;margin:0 0 10px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.item{cursor:pointer}.item b{font-size:17px}.item div{font-size:14px;color:var(--sub)}.item .d{color:var(--acc)}
+.bem{margin-top:4px}
+h2{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);font-size:13px;text-transform:uppercase;margin:16px 4px 6px}
+label{display:block;font-size:13px;color:var(--sub);margin:8px 0 2px}
+input,textarea{width:100%;font:inherit;color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px}
+textarea{min-height:130px}
+.row{display:flex;gap:8px}.row button{flex:0 0 52px}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;background:var(--acc);color:#fff;font-weight:600}
+button.sec{background:var(--card);color:var(--text);border:1px solid var(--line)}
+button.del{background:var(--danger)}
+.fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;font-size:32px;line-height:1;padding:0;box-shadow:0 3px 10px rgba(0,0,0,.4)}
+#msg{display:none;background:#fff3cd;color:#5c4400;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:14px}
+.empty{color:#fff;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-top:40px}
+.acts{display:flex;gap:8px;margin:14px 0 24px}.acts button{flex:1}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<div id="list-view">
+  <div class="bar"><h1>Rundgänge</h1><div style="display:flex;gap:6px"><button class="sec" id="btn-csv">Export</button><button class="sec" id="btn-imp">Import</button></div><input type="file" id="f-imp" accept=".csv,text/csv" hidden></div>
+  <div id="msg"></div>
+  <div id="list"></div>
+  <button class="fab" id="btn-new" aria-label="Neuer Rundgang">+</button>
+</div>
+<div id="form-view" hidden>
+  <h1 id="form-title">Neuer Rundgang</h1>
+  <div id="msg2" class="card" style="display:none;background:#fff3cd;color:#5c4400"></div>
+  <h2>Allgemein</h2>
+  <div class="card">
+    <label for="f-datum">Datum</label><input type="date" id="f-datum">
+    <label for="f-nied">Niederschlag (mm)</label><input id="f-nied" inputmode="decimal" placeholder="z. B. 1,25">
+  </div>
+  <h2>Temperaturen (°C)</h2>
+  <div class="card">
+    <label for="f-min">MIN</label><div class="row"><input id="f-min" inputmode="decimal"><button type="button" class="sec" data-sign="f-min">+/−</button></div>
+    <label for="f-jetzt">Jetzt</label><div class="row"><input id="f-jetzt" inputmode="decimal"><button type="button" class="sec" data-sign="f-jetzt">+/−</button></div>
+    <label for="f-max">MAX</label><div class="row"><input id="f-max" inputmode="decimal"><button type="button" class="sec" data-sign="f-max">+/−</button></div>
+  </div>
+  <h2>Zählerstände</h2>
+  <div class="card">
+    <label for="f-mgt">Zählerstand MGT (kWh)</label><input id="f-mgt" inputmode="numeric">
+    <label for="f-gas">Zählerstand Gas (m³)</label><input id="f-gas" inputmode="numeric">
+    <label for="f-wasser">Zählerstand Wasser (m³)</label><input id="f-wasser" inputmode="numeric">
+  </div>
+  <h2>Bemerkungen</h2>
+  <div class="card"><textarea id="f-bem"></textarea></div>
+  <div class="acts"><button class="sec" id="btn-cancel">Abbrechen</button><button id="btn-save">Speichern</button></div>
+  <div class="acts" id="del-wrap"><button class="del" id="btn-del">Löschen</button></div>
+</div>
+</main>
+<script>
+const KEY = "rundgaenge_v1";
+let items = [], editing = null, delTimer = null;
+const $ = s => document.querySelector(s);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = (n, d) => Number(n).toFixed(d).replace(".", ",");
+const num = t => { const v = parseFloat(String(t).replace(",", ".")); return isNaN(v) ? 0 : v; };
+const dt = iso => iso.split("-").reverse().join(".");
+const diff = (n, u) => " (" + (n >= 0 ? "+" : "−") + Math.abs(Math.round(n)) + " " + u + ")";
+const heute = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); };
+const bereinigt = t => t.split("\n").filter(z => { const s = z.trim(); return s && s !== "•"; }).join("\n");
+const alsListe = t => t.split("\n").filter(z => z.trim()).map(z => z.startsWith("•") ? z : "• " + z).join("\n");
+
+function meldung(text, el) {
+  el = $(el || "#msg"); el.textContent = text; el.style.display = text ? "block" : "none";
+}
+function lokalLaden() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
+function lokalSpeichern() { try { localStorage.setItem(KEY, JSON.stringify(items)); return true; } catch (e) { return false; } }
+
+function start() {
+  items = lokalLaden();
+  render();
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+async function put(r) {
+  const i = items.findIndex(x => x.id === r.id);
+  if (i >= 0) items[i] = r; else items.push(r);
+  if (!lokalSpeichern()) throw new Error("Browser-Speicher nicht verfügbar");
+}
+async function entfernen(id) {
+  items = items.filter(x => x.id !== id);
+  if (!lokalSpeichern()) throw new Error("Browser-Speicher nicht verfügbar");
+}
+
+function render() {
+  const s = items.slice().sort((a, b) => b.id.localeCompare(a.id));
+  if (!s.length) { $("#list").innerHTML = '<p class="empty">Keine Rundgänge.<br>Tippe auf +, um den ersten zu erfassen.</p>'; return; }
+  $("#list").innerHTML = s.map((r, i) => {
+    const v = s[i + 1];
+    const dMgt = v ? diff(r.mgt - v.mgt, "kWh") : "", dGas = v ? diff(r.gas - v.gas, "m³") : "", dWas = v ? diff(r.wasser - v.wasser, "m³") : "";
+    const bem = r.bem ? '<div class="bem">Bemerkung:' + r.bem.split("\n").map(z => "<div>" + esc(z) + "</div>").join("") + "</div>" : "";
+    return '<div class="card item" data-id="' + r.id + '"><b>' + dt(r.id) + "</b>" +
+      "<div>Niederschlag: " + fmt(r.nied, 2) + " mm</div>" +
+      "<div>Temperatur: Min " + fmt(r.tmin, 0) + " °C · Jetzt " + fmt(r.tjetzt, 0) + " °C · Max " + fmt(r.tmax, 0) + " °C</div>" +
+      "<div>MGT: " + fmt(r.mgt, 0) + " kWh<span class=d>" + dMgt + "</span></div>" +
+      "<div>Gas: " + fmt(r.gas, 0) + " m³<span class=d>" + dGas + "</span></div>" +
+      "<div>Wasser: " + fmt(r.wasser, 0) + " m³<span class=d>" + dWas + "</span></div>" + bem + "</div>";
+  }).join("");
+}
+
+function zeige(form) { $("#list-view").hidden = form; $("#form-view").hidden = !form; window.scrollTo(0, 0); }
+function oeffne(id) {
+  editing = id; meldung("", "#msg2");
+  const r = id ? items.find(x => x.id === id) : null;
+  $("#form-title").textContent = r ? "Bearbeiten" : "Neuer Rundgang";
+  $("#f-datum").value = r ? r.id : heute();
+  $("#f-nied").value = r ? fmt(r.nied, 2) : "";
+  $("#f-min").value = r ? fmt(r.tmin, 0) : ""; $("#f-jetzt").value = r ? fmt(r.tjetzt, 0) : ""; $("#f-max").value = r ? fmt(r.tmax, 0) : "";
+  $("#f-mgt").value = r ? fmt(r.mgt, 0) : ""; $("#f-gas").value = r ? fmt(r.gas, 0) : ""; $("#f-wasser").value = r ? fmt(r.wasser, 0) : "";
+  $("#f-bem").value = r ? alsListe(r.bem || "") : "";
+  $("#del-wrap").hidden = !r; $("#btn-del").textContent = "Löschen";
+  zeige(true);
+}
+
+async function speichern() {
+  const datum = $("#f-datum").value;
+  if (!datum) return meldung("Bitte ein Datum wählen.", "#msg2");
+  if (datum !== editing && items.some(x => x.id === datum))
+    return meldung("Für den " + dt(datum) + " existiert schon ein Rundgang. Bitte dort bearbeiten oder ein anderes Datum wählen.", "#msg2");
+  const r = { id: datum, nied: Math.round(num($("#f-nied").value) * 100) / 100,
+    tmin: Math.round(num($("#f-min").value)), tjetzt: Math.round(num($("#f-jetzt").value)), tmax: Math.round(num($("#f-max").value)),
+    mgt: Math.round(num($("#f-mgt").value)), gas: Math.round(num($("#f-gas").value)), wasser: Math.round(num($("#f-wasser").value)),
+    bem: bereinigt($("#f-bem").value) };
+  try {
+    await put(r);
+    if (editing && editing !== datum) await entfernen(editing);
+  } catch (e) { return meldung("Speichern fehlgeschlagen: " + (e && e.message || e), "#msg2"); }
+  render(); zeige(false);
+}
+
+function csv() {
+  const q = t => '"' + String(t).replace(/"/g, '""') + '"';
+  const z = ["Datum;Niederschlag mm;Temp Min;Temp Jetzt;Temp Max;MGT kWh;Gas m3;Wasser m3;Bemerkung"];
+  items.slice().sort((a, b) => a.id.localeCompare(b.id)).forEach(r =>
+    z.push([dt(r.id), fmt(r.nied, 2), r.tmin, r.tjetzt, r.tmax, r.mgt, r.gas, r.wasser, q((r.bem || "").replace(/\n/g, " | "))].join(";")));
+  const blob = new Blob(["\uFEFF" + z.join("\r\n")], { type: "text/csv" });
+  const file = new File([blob], "rundgaenge.csv", { type: "text/csv" });
+  const fallback = () => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "rundgaenge.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+  if (navigator.canShare && navigator.canShare({ files: [file] }))
+    return navigator.share({ files: [file] }).catch(e => { if (!e || e.name !== "AbortError") fallback(); });
+  fallback();
+}
+
+function parseCsv(text) {
+  const rows = []; let row = [], cur = "", q = false;
+  text = text.replace(/^\uFEFF/, "");
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ";") { row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cur); cur = ""; rows.push(row); row = []; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+async function importieren(file) {
+  try {
+    const rows = parseCsv(await file.text()).slice(1).filter(r => /^\d{2}\.\d{2}\.\d{4}$/.test(r[0] || ""));
+    for (const r of rows) {
+      const p = r[0].split(".");
+      await put({ id: p[2] + "-" + p[1] + "-" + p[0], nied: num(r[1]), tmin: Math.round(num(r[2])), tjetzt: Math.round(num(r[3])), tmax: Math.round(num(r[4])),
+        mgt: Math.round(num(r[5])), gas: Math.round(num(r[6])), wasser: Math.round(num(r[7])), bem: bereinigt(alsListe((r[8] || "").split(" | ").join("\n"))) });
+    }
+    render(); meldung(rows.length + " Rundgänge importiert (vorhandene Daten gleichen Datums wurden überschrieben).");
+  } catch (e) { meldung("Import fehlgeschlagen: " + (e && e.message || e)); }
+}
+$("#btn-imp").onclick = () => $("#f-imp").click();
+$("#f-imp").onchange = e => { if (e.target.files[0]) importieren(e.target.files[0]); e.target.value = ""; };
+$("#btn-new").onclick = () => oeffne(null);
+$("#btn-cancel").onclick = () => zeige(false);
+$("#btn-save").onclick = speichern;
+$("#btn-csv").onclick = csv;
+$("#list").onclick = e => { const c = e.target.closest(".item"); if (c) oeffne(c.dataset.id); };
+document.querySelectorAll("[data-sign]").forEach(b => b.onclick = () => {
+  const f = $("#" + b.dataset.sign); f.value = f.value.startsWith("-") ? f.value.slice(1) : "-" + f.value;
+});
+$("#btn-del").onclick = async () => {
+  const b = $("#btn-del");
+  if (!delTimer) { b.textContent = "Wirklich löschen?"; delTimer = setTimeout(() => { delTimer = null; b.textContent = "Löschen"; }, 3500); return; }
+  clearTimeout(delTimer); delTimer = null;
+  try { await entfernen(editing); } catch (e) { return meldung("Löschen fehlgeschlagen.", "#msg2"); }
+  render(); zeige(false);
+};
+const bem = $("#f-bem");
+bem.addEventListener("focus", () => { if (!bem.value.trim()) bem.value = "• "; });
+bem.addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); bem.setRangeText("\n• ", bem.selectionStart, bem.selectionEnd, "end"); }
+});
+start();
+</script>
+</body>
+</html>
